@@ -2,7 +2,6 @@ import csv
 import re
 import os
 import zipfile
-import pandas as pd
 
 
 
@@ -79,39 +78,59 @@ def extract_eco(save):
         writer = csv.writer(csvfile)
         writer.writerows(rows)
 
+
 def mergecsv():
-    csv_files = [file for file in os.listdir("Extracted_saves") if file.endswith(".csv")]
-    # Initialize an empty DataFrame to store the merged data
-    merged_df = pd.DataFrame()
+    # Directory where the extracted save files are located
+    extract_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Extracted_saves")
 
-    # Loop through each CSV file
+    # Collect all CSV file paths
+    csv_files = []
+    for root, dirs, files in os.walk(extract_dir):
+        for file in files:
+            if file.endswith(".csv"):
+                csv_files.append(os.path.join(root, file))
+
+    # Dictionary to hold merged data
+    merged_data = {}
+    time_points = set()
+
+    # Read each CSV file and gather all time points
     for file in csv_files:
-        # Read the CSV file into a DataFrame
-        df = pd.read_csv(os.path.join("Extracted_saves", file), index_col=0)
+        with open(file, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                country_code = row[0]
+                values = row[1:]
+                if country_code not in merged_data:
+                    merged_data[country_code] = []
+                time_points.update(range(1, len(values) + 1))
 
-        # Merge the DataFrame with the existing merged DataFrame using the common key column
-        merged_df = merged_df.combine_first(df)
+    # Convert the time points set to a sorted list
+    time_points = sorted(time_points)
 
-    # Replace null values with non-null values
-    merged_df.ffill(inplace=True)
-    merged_df.to_csv("merged_data.csv")
+    # Initialize the data structure with empty lists for each time point
+    for country_code in merged_data.keys():
+        merged_data[country_code] = [''] * len(time_points)
 
-    # Step 1: Optimize data types if necessary
-    # Ensure that 'key' columns are of the same data type
-    df1['key'] = df1['key'].astype(int)
-    df2['key'] = df2['key'].astype(int)
+    # Read each CSV file again and place values in the correct positions
+    for file in csv_files:
+        with open(file, 'r') as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                country_code = row[0]
+                values = row[1:]
+                for i, value in enumerate(values):
+                    if value:
+                        merged_data[country_code][i] = value
 
-    # Step 2: Set index for faster merging
-    df1.set_index('key', inplace=True)
-    df2.set_index('key', inplace=True)
-
-    # Step 3: Merge the DataFrames using appropriate merge method
-    merged_df = df1.merge(df2, how='inner', left_index=True, right_index=True)
-
-    # Step 4: Reset index if needed
-    merged_df.reset_index(inplace=True)
-
-
+    # Write the merged data to a new CSV file
+    with open('merged_output.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        header = ['Country'] + [f'Time {tp}' for tp in time_points]
+        writer.writerow(header)
+        for country_code, values in merged_data.items():
+            row = [country_code] + values
+            writer.writerow(row)
 files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 
 print(files)
@@ -124,6 +143,4 @@ files = os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),"Extr
 
 for i in files:
     extract_eco(os.path.join(os.path.dirname(os.path.abspath(__file__)),"Extracted_saves",i))
-
-# Call the mergecsv function to merge the CSV files
 mergecsv()
