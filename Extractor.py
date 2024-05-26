@@ -22,12 +22,14 @@ def unzip(zip_file):
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
 
+
 def extract_eco(save):
     gdp = False
     with open(f"{save}/gamestate", "r") as file:
         # Initialize variables to store country and values
         current_country = None
         values = []
+        line_number = 0  # Track the line number
 
         # Open CSV file for writing
         with open(f"{save}output.csv", 'w', newline='') as csvfile:
@@ -35,6 +37,7 @@ def extract_eco(save):
 
             # Iterate over each line in the file
             for line in file:
+                line_number += 1  # Increment line number
                 # Check if the line contains the specified definition
                 if 'definition="' in line:
                     # Extract the country name
@@ -48,8 +51,11 @@ def extract_eco(save):
                             gdp = False
 
                 # Check if the line contains the values
-                if 'values={' in line and gdp:
-                    # Extract the values
+                if 'gdp={' in line and gdp:
+                    # Move to the line 7 lines below
+                    for _ in range(7):
+                        line = next(file)
+
                     values_str = re.search(r'values={(.+?)}', line)
                     if values_str:
                         values = [float(val) for val in values_str.group(1).split()]
@@ -59,7 +65,6 @@ def extract_eco(save):
                         # Reset values for next country
                         values = []
                         gdp = False
-
     # Reopen the output.csv file to modify
     with open(f"{save}output.csv", 'r') as csvfile:
         reader = csv.reader(csvfile)
