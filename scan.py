@@ -1,7 +1,13 @@
 import os
 import shutil
 import glob
+from dotenv import load_dotenv
 
+load_dotenv()
+
+# env variables
+outputfolder = os.getenv('OUTPUT_FOLDER')
+documentsgamefolder = os.getenv('DOCUMENTS_GAME_FOLDER')
 """
 ISSUES 
 doesnt check saves have same game id? = 00000275 so the last 8 digits of the first line 
@@ -62,4 +68,4 @@ while running is True:
     lastsave = Save(name=file_name, edited=last_edited_timestamp, saveid=Save.getid(oldsavelocation))
 
 
-    Scaner(r"",lastsave,outputfolder)
+    Scaner(documentsgamefolder,lastsave,outputfolder)
