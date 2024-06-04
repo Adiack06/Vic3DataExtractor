@@ -10,8 +10,6 @@ outputfolder = os.getenv('OUTPUT_FOLDER')
 documentsgamefolder = os.getenv('DOCUMENTS_GAME_FOLDER')
 """
 ISSUES 
-doesnt check saves have same game id? = 00000275 so the last 8 digits of the first line 
-doesnt check if there is already a save with the same id
 if a new autosave were to arrive during the procces it would break the ting
 deoest work if we dont have a starting save
 """
