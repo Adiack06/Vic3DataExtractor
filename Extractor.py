@@ -5,25 +5,13 @@ import zipfile
 
 
 
-def unzip(zip_file):
-   # Get the absolute path of the directory containing the Python script
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    
-    # Extract the file name and extension from the zip file path
-    file_name, _ = os.path.splitext(zip_file)
-    
-    # Create the directory for extraction (same name as the zip file)
-    extract_to = os.path.join(script_dir,"Extracted_saves", file_name)
-    os.makedirs(extract_to, exist_ok=True)
-    
-    # Extract the contents of the zip file to the created directory
-    files = script_dir
-    if not file_name in files:
-        with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(extract_to)
+def unzip(zip_file, extract_to):
+
+    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
 
 
-def extract_eco(save):
+def extract_eco(save ,selected_data_type):
     gdp = False
     with open(f"{save}/gamestate", "r") as file:
         # Initialize variables to store country and values
@@ -51,11 +39,10 @@ def extract_eco(save):
                             gdp = False
 
                 # Check if the line contains the values
-                if 'gdp={' in line and gdp:
+                if selected_data_type in line and gdp:
                     # Move to the line 7 lines below
                     for _ in range(7):
                         line = next(file)
-
                     values_str = re.search(r'values={(.+?)}', line)
                     if values_str:
                         values = [float(val) for val in values_str.group(1).split()]
@@ -84,59 +71,58 @@ def extract_eco(save):
         writer.writerows(rows)
 
 
-def mergecsv():
-    # Directory where the extracted save files are located
-    extract_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Extracted_saves")
 
-    # Collect all CSV file paths
+
+
+def mergecsv(extract_dir):
     csv_files = []
     for root, dirs, files in os.walk(extract_dir):
         for file in files:
             if file.endswith(".csv"):
                 csv_files.append(os.path.join(root, file))
 
-    # Dictionary to hold merged data
     merged_data = {}
     time_points = set()
 
-    # Read each CSV file and gather all time points
     for file in csv_files:
         with open(file, 'r') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
-                country_code = row[0]
-                values = row[1:]
-                if country_code not in merged_data:
-                    merged_data[country_code] = []
+                data_type = row[0]
+                country_code = row[1]
+                values = row[2:]
+                key = (data_type, country_code)
+                if key not in merged_data:
+                    merged_data[key] = []
                 time_points.update(range(1, len(values) + 1))
 
-    # Convert the time points set to a sorted list
     time_points = sorted(time_points)
 
-    # Initialize the data structure with empty lists for each time point
-    for country_code in merged_data.keys():
-        merged_data[country_code] = [''] * len(time_points)
+    for key in merged_data.keys():
+        merged_data[key] = [''] * len(time_points)
 
-    # Read each CSV file again and place values in the correct positions
     for file in csv_files:
         with open(file, 'r') as csvfile:
             reader = csv.reader(csvfile)
             for row in reader:
-                country_code = row[0]
-                values = row[1:]
+                data_type = row[0]
+                country_code = row[1]
+                values = row[2:]
+                key = (data_type, country_code)
                 for i, value in enumerate(values):
                     if value:
-                        merged_data[country_code][i] = value
+                        merged_data[key][i] = value
 
-    # Write the merged data to a new CSV file
     with open('merged_output.csv', 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        header = ['Country'] + [f'Time {tp}' for tp in time_points]
+        header = ['Data Type', 'Country'] + [f'Time {tp}' for tp in time_points]
         writer.writerow(header)
-        for country_code, values in merged_data.items():
-            row = [country_code] + values
+        for key, values in merged_data.items():
+            row = list(key) + values
             writer.writerow(row)
-files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
+
+    return 'merged_output.csv'
+'''files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
 
 print(files)
 
@@ -148,4 +134,4 @@ files = os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),"Extr
 
 for i in files:
     extract_eco(os.path.join(os.path.dirname(os.path.abspath(__file__)),"Extracted_saves",i))
-mergecsv()
+mergecsv()'''
