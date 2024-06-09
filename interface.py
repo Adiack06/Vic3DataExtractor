@@ -58,7 +58,7 @@ def run_program(zip_files, selected_data_type):
         file_name, _ = os.path.splitext(os.path.basename(zip_file))
         save_path = os.path.join(extract_dir, file_name)
         os.makedirs(save_path, exist_ok=True)
-        unzip(zip_file, save_path)
+        meltsaves(r"\saves", r"\Extracted_saves")
         extract_eco(save_path, selected_data_type)
         progress_var.set(i + 1)
         root.update_idletasks()
@@ -69,7 +69,7 @@ def run_program(zip_files, selected_data_type):
 
 
 def select_files():
-    files = filedialog.askopenfilenames(filetypes=[("ZIP files", "*.v3")])
+    files = filedialog.askopenfilenames(filetypes=[("Saves", "")])
     if files:
         def on_select_data_type():
             selected_data_type = data_type_var.get()

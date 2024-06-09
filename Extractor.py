@@ -1,19 +1,29 @@
 import csv
 import re
 import os
-import zipfile
+from dotenv import load_dotenv
+import glob
+import shutil
+
+load_dotenv()
 
 
 
-def unzip(zip_file, extract_to):
 
-    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
+def meltsaves(save_folder, destination_folder):
+    saves = glob.glob(os.path.join(save_folder, "*.v3"))
+    for save in saves:
+        os.system(f"rakaly json --unknown-key stringify \"{save}\"")
 
+        base_name = os.path.splitext(os.path.basename(save))[0]
+        output_file = os.path.join(save_folder, f"{base_name}_melted.v3")
+        destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
+        shutil.copy(output_file, destination)
+        print(f"Processed {len(saves)} save files.")
 
 def extract_eco(save ,selected_data_type):
     gdp = False
-    with open(f"{save}/gamestate", "r") as file:
+    with open(f"{save}", "r") as file:
         # Initialize variables to store country and values
         current_country = None
         values = []
@@ -122,16 +132,3 @@ def mergecsv(extract_dir):
             writer.writerow(row)
 
     return 'merged_output.csv'
-'''files = os.listdir(os.path.dirname(os.path.abspath(__file__)))
-
-print(files)
-
-for i in files:
-    if ".v3" in i:
-        unzip(i)
-
-files = os.listdir(os.path.join(os.path.dirname(os.path.abspath(__file__)),"Extracted_saves"))
-
-for i in files:
-    extract_eco(os.path.join(os.path.dirname(os.path.abspath(__file__)),"Extracted_saves",i))
-mergecsv()'''

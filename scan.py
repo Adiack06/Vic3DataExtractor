@@ -61,11 +61,11 @@ def Scaner(documentsgamefolder, lastsave, outputfolder):
 
     if NewSave.id and NewSave.edited > lastsave.edited and NewSave.gameid == lastsave.gameid and NewSave.id != lastsave.id:
         source = os.path.join(savegamesfolder, NewSave.name)
-        destination = os.path.join(outputfolder, f"{NewSave.name}-{NewSave.edited}")
+        destination = os.path.join(outputfolder, f"{NewSave.edited}-{NewSave.name}")
         shutil.copy(source, destination)
         print("Save successfully moved")
     else:
-        print("Save not from correct campaign or save already in folder")
+        print("No new save from with same campaign id")
 
 running = True
 while running:
