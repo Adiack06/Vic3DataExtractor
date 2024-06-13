@@ -47,18 +47,18 @@ def plot_graph(csv_file):
     plt.show()
 
 
-def run_program(zip_files, selected_data_type):
+def run_program(files, selected_data_type):
     extract_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "Extracted_saves")
     os.makedirs(extract_dir, exist_ok=True)
 
     progress_var.set(0)
-    progress_bar['maximum'] = len(zip_files)
+    progress_bar['maximum'] = len(files)
 
-    for i, zip_file in enumerate(zip_files):
-        file_name, _ = os.path.splitext(os.path.basename(zip_file))
-        save_path = os.path.join(extract_dir, file_name)
-        os.makedirs(save_path, exist_ok=True)
-        meltsaves(r"\saves", r"\Extracted_saves")
+    for i, file in enumerate(files):
+        file_name, _ = os.path.splitext(os.path.basename(file))
+        print(file_name)
+        save_path = meltsave(file, extract_dir)
+        print(save_path)
         extract_eco(save_path, selected_data_type)
         progress_var.set(i + 1)
         root.update_idletasks()

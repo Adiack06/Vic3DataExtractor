@@ -6,10 +6,19 @@ import glob
 import shutil
 
 load_dotenv()
+"""
+ISSUES 
+whole thing goes boomb if the save is not a binary
 
+"""
 
-
-
+def meltsave(save, destination_folder):
+    os.system(f"rakaly melt --unknown-key stringify \"{save}\"")
+    base_name = os.path.splitext(os.path.basename(save))[0]
+    output_file = os.path.join(os.path.dirname(save), f"{base_name}_melted.v3")
+    destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
+    shutil.move(output_file, destination)
+    return destination
 def meltsaves(save_folder, destination_folder):
     saves = glob.glob(os.path.join(save_folder, "*.v3"))
     for save in saves:
