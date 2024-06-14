@@ -47,7 +47,7 @@ class Save:
         print(f"Save Name: {self.name}")
         print(f"Save Edited: {self.edited}")
 
-def Scaner(documentsgamefolder, lastsave, outputfolder):
+def scan(documentsgamefolder, lastsave, outputfolder):
     savegamesfolder = os.path.join(documentsgamefolder, "save games")
     autosave_files = glob.glob(os.path.join(savegamesfolder, "autosave.v3")) + \
                      glob.glob(os.path.join(savegamesfolder, "autosave_exit.v3"))
@@ -66,21 +66,22 @@ def Scaner(documentsgamefolder, lastsave, outputfolder):
         shutil.copy(source, destination)
         print("Save successfully moved")
     else:
-        print("No new save from with same campaign id")
+        print("No new save from with same session id")
+    time.sleep(5)
+def scanner(documentsgamefolder, outputfolder,stop_event):
+    while not stop_event.is_set():
+        files = glob.glob(os.path.join(outputfolder, "*"))
+        if not files:
+            print("No starting save files found in the save folder")
+            time.sleep(10)  # Wait for 10 seconds before retrying
+            continue
 
-running = True
-while running:
-    files = glob.glob(os.path.join(outputfolder, "*"))
-    if not files:
-        print("No save files found in the save folder")
-        time.sleep(10)  # Wait for 10 seconds before retrying
-        continue
+        last_edited_file = max(files, key=os.path.getmtime)
+        file_name = os.path.basename(last_edited_file)
+        oldsavelocation = os.path.join(outputfolder, file_name)
+        last_edited_timestamp = os.path.getmtime(last_edited_file)
+        lastsave = Save(name=file_name, edited=last_edited_timestamp, saveid=Save.getid(oldsavelocation))
 
-    last_edited_file = max(files, key=os.path.getmtime)
-    file_name = os.path.basename(last_edited_file)
-    oldsavelocation = os.path.join(outputfolder, file_name)
-    last_edited_timestamp = os.path.getmtime(last_edited_file)
-    lastsave = Save(name=file_name, edited=last_edited_timestamp, saveid=Save.getid(oldsavelocation))
-
-    Scaner(documentsgamefolder, lastsave, outputfolder)
-    time.sleep(5)  # Wait for 10 seconds before scanning again
+        scan(documentsgamefolder, lastsave, outputfolder)
+        time.sleep(5)  # Wait for 10 seconds before scanning again
+    print("Scanner stopped")

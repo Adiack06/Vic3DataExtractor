@@ -19,16 +19,17 @@ def meltsave(save, destination_folder):
     output_file = os.path.join(os.path.dirname(save), f"{base_name}_melted.v3")
     destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
     shutil.move(output_file, destination)
+    print(f"{base_name} melted")
     return destination
 def meltsaves(save_folder, destination_folder):
     saves = glob.glob(os.path.join(save_folder, "*.v3"))
     for save in saves:
         os.system(f"rakaly json --unknown-key stringify \"{save}\"")
-
-        base_name = os.path.splitext(os.path.basename(save))[0]
-        output_file = os.path.join(save_folder, f"{base_name}_melted.v3")
-        destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
-        shutil.copy(output_file, destination)
+        if destination_folder != save_folder:
+            base_name = os.path.splitext(os.path.basename(save))[0]
+            output_file = os.path.join(save_folder, f"{base_name}_melted.v3")
+            destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
+            shutil.copy(output_file, destination)
         print(f"Processed {len(saves)} save files.")
 
 def extract_eco(save, selected_data_type):
