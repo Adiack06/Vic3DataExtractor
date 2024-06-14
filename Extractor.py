@@ -9,6 +9,7 @@ load_dotenv()
 """
 ISSUES 
 whole thing goes boomb if the save is not a binary
+it doesnt delete if the save has already been extracted 
 
 """
 
@@ -30,66 +31,57 @@ def meltsaves(save_folder, destination_folder):
         shutil.copy(output_file, destination)
         print(f"Processed {len(saves)} save files.")
 
-def extract_eco(save ,selected_data_type):
+def extract_eco(save, selected_data_type):
     gdp = False
     with open(f"{save}", "r") as file:
-        # Initialize variables to store country and values
         current_country = None
         values = []
-        line_number = 0  # Track the line number
+        line_number = 0
 
-        # Open CSV file for writing
         with open(f"{save}output.csv", 'w', newline='') as csvfile:
             writer = csv.writer(csvfile)
 
-            # Iterate over each line in the file
             for line in file:
-                line_number += 1  # Increment line number
-                # Check if the line contains the specified definition
+                line_number += 1
+
                 if 'definition="' in line:
-                    # Extract the country name
                     match = re.search(r'definition="(\w+)"', line)
                     if match:
                         current_country = match.group(1)
-                        # Check if the country name is three letters long
                         if len(current_country) == 3:
                             gdp = True
                         else:
                             gdp = False
 
-                # Check if the line contains the values
                 if selected_data_type in line and gdp:
-                    # Move to the line 7 lines below
-                    for _ in range(7):
+                    # Skip lines until reaching 'values={'
+                    while 'values={' not in line:
                         line = next(file)
-                    values_str = re.search(r'values={(.+?)}', line)
+
+                    # Move to the next line where the actual values are located
+                    line = next(file)
+
+                    values_str = re.search(r'(\d[\d\s.]+)', line)
                     if values_str:
                         values = [float(val) for val in values_str.group(1).split()]
-                        # Write to CSV
                         row = [current_country] + values
                         writer.writerow(row)
-                        # Reset values for next country
                         values = []
                         gdp = False
-    # Reopen the output.csv file to modify
+
     with open(f"{save}output.csv", 'r') as csvfile:
         reader = csv.reader(csvfile)
         rows = list(reader)
 
-    # Determine the largest number of columns
     largest = max(len(row) for row in rows)
 
-    # Add blank columns after the first column if needed
     for row in rows:
         num_blank_columns = largest - len(row)
         row[:] = [row[0]] + [''] * num_blank_columns + row[1:]
 
-    # Write back to the output.csv file
     with open(f"{save}output.csv", 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(rows)
-
-
 
 
 
