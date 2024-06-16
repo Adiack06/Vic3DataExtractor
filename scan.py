@@ -67,7 +67,6 @@ def scan(documentsgamefolder, lastsave, outputfolder):
         print("Save successfully moved")
     else:
         print("No new save from with same session id")
-    time.sleep(5)
 def scanner(documentsgamefolder, outputfolder,stop_event):
     while not stop_event.is_set():
         files = glob.glob(os.path.join(outputfolder, "*"))
@@ -83,5 +82,8 @@ def scanner(documentsgamefolder, outputfolder,stop_event):
         lastsave = Save(name=file_name, edited=last_edited_timestamp, saveid=Save.getid(oldsavelocation))
 
         scan(documentsgamefolder, lastsave, outputfolder)
-        time.sleep(5)  # Wait for 10 seconds before scanning again
-    print("Scanner stopped")
+        if stop_event.is_set():
+            print("Scanner stopped")
+            return
+        time.sleep(10)  # Wait for 10 seconds before scanning again
+

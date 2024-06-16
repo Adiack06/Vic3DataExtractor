@@ -4,12 +4,14 @@ import os
 from dotenv import load_dotenv
 import glob
 import shutil
+import threading
 
 load_dotenv()
 """
 ISSUES 
 whole thing goes boomb if the save is not a binary
 it doesnt delete if the save has already been extracted 
+implent better comments
 
 """
 
@@ -20,17 +22,25 @@ def meltsave(save, destination_folder):
     destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
     shutil.move(output_file, destination)
     print(f"{base_name} melted")
-    return destination
-def meltsaves(save_folder, destination_folder):
-    saves = glob.glob(os.path.join(save_folder, "*.v3"))
+    return
+def meltsaves(saves, destination_folder):
+    threads_limit = 6
+    active_threads = []
+
     for save in saves:
-        os.system(f"rakaly json --unknown-key stringify \"{save}\"")
-        if destination_folder != save_folder:
-            base_name = os.path.splitext(os.path.basename(save))[0]
-            output_file = os.path.join(save_folder, f"{base_name}_melted.v3")
-            destination = os.path.join(destination_folder, f"{base_name}_melted.v3")
-            shutil.copy(output_file, destination)
-        print(f"Processed {len(saves)} save files.")
+        while len(active_threads) >= threads_limit:
+            active_threads = [t for t in active_threads if t.is_alive()]
+            threading.Event().wait(0.5)  # Briefly wait for threads to complete
+
+        t = threading.Thread(target=meltsave, args=(save, destination_folder))
+        active_threads.append(t)
+        t.start()
+
+    # Wait for all threads to complete
+    for t in active_threads:
+        t.join()
+
+    print("All saves melted.")
 
 def extract_eco(save, selected_data_type):
     gdp = False

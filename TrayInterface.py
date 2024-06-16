@@ -48,17 +48,18 @@ def stop_scanner(icon, item):
         if thread.name == "Scanner":
             thread.join()  # Ensure the thread has finished
     threads[:] = [thread for thread in threads if thread.is_alive()]
+    stop_event.clear()
     pass
 
 def melt_saves(icon, item):
-    global threads ,saves_to_melt
-    for save in saves_to_melt:
+    global saves_to_melt ,threads
+    if saves_to_melt:
         stop_event.clear()  # Reset the stop event
-        t = threading.Thread(target=meltsave, args=(save, os.path.dirname(save)))
-        threads.append(t)
-        t.start()
-
-    pass
+        melter_thread = threading.Thread(target=meltsaves, args=(saves_to_melt, outputfolder),name="Scanner")
+        threads.append(melter_thread)
+        melter_thread.start()
+    else:
+        print("No saves selected to melt.")
 def select_saves(icon, item):
     global saves_to_melt
     saves_to_melt = filedialog.askopenfilenames(filetypes=[("Saves", ".v3")])

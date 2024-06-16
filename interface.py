@@ -54,10 +54,12 @@ def run_program(files, selected_data_type):
     progress_var.set(0)
     progress_bar['maximum'] = len(files)
 
+    meltsaves(files, extract_dir)
+
     for i, file in enumerate(files):
         file_name, _ = os.path.splitext(os.path.basename(file))
         print(file_name)
-        save_path = meltsave(file, extract_dir)
+        save_path = os.path.join(extract_dir, f"{file_name}_melted.v3")
         print(save_path)
         extract_eco(save_path, selected_data_type)
         progress_var.set(i + 1)
