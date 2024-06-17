@@ -41,7 +41,8 @@ def meltsaves(saves, destination_folder):
         t.join()
 
     print("All saves melted.")
-
+def extract_ecos(saves, destination_folder):
+    pass
 def extract_eco(save, selected_data_type):
     gdp = False
     with open(f"{save}", "r") as file:

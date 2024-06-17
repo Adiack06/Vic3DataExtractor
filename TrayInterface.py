@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 '''
 issue
-no error shown to suer if there isn't a starting save
+no error shown to user if there isn't a starting save
 '''
 
 # env variables
@@ -65,8 +65,14 @@ def select_saves(icon, item):
     saves_to_melt = filedialog.askopenfilenames(filetypes=[("Saves", ".v3")])
     pass
 
+
 def select_starting_save(icon, item):
-    pass
+    starting_save = filedialog.askopenfilename(filetypes=[("Save files", "*.v3")])
+
+    if starting_save:
+        destination = os.path.join(os.path.dirname(os.path.abspath(__file__)), "saves")
+        os.makedirs(destination, exist_ok=True)
+        shutil.copy(starting_save, destination)
 def settings(icon, item):
     pass
 

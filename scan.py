@@ -13,8 +13,8 @@ documentsgamefolder = os.getenv('DOCUMENTS_GAME_FOLDER')
 """
 ISSUES 
 if a new autosave were to arrive during the procces it would break the ting
-deoenst work if we dont have a starting save
 if you change country the id seems to change
+the same with if there is a rehost
 
 """
 class Save:
